@@ -9,7 +9,7 @@
                 {
                     "StartAt": "Enrichment",
                     "States": {
-                        "Enrichissement": {
+                        "Enrichment": {
                             "Type": "Task",
                             "Resource": "${enrichment_arn}",
                             "End": true
