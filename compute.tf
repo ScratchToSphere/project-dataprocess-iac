@@ -19,24 +19,61 @@ resource "aws_s3_bucket" "dataprocess-output-thomas" {
 }
 
 # Create the code archive for the Lambda function Enrichment
-data "archive_file" "zip_enrichissement" {
+data "archive_file" "zip_enrichment" {
   type        = "zip"
-  source_file = "src/enrichissement.py" 
+  source_file = "src/enrichment.py" 
   output_path = "enrichissement.zip"
+}
+
+# Create the code archive for the Lambda function anonymization
+data "archive_file" "zip_anonymization" {
+  type        = "zip"
+  source_file = "src/anonymization.py" 
+  output_path = "anonymization.zip"
+}
+
+# Create the code archive for the Lambda function consolidation
+data "archive_file" "zip_consolidation" {
+  type        = "zip"
+  source_file = "src/consolidation.py" 
+  output_path = "consolidation.zip"
 }
 
 # Create the lambda function Enrichment
 resource "aws_lambda_function" "Enrichment" {
     function_name = "EnrichmentFunction"
 
-    s3_bucket = aws_s3_bucket.lambda_bucket.id
-    s3_key    = aws_s3_object.lambda_enrichment.key
-
     runtime = "python3.11"
     handler = "enrichment.lambda_handler"
 
     filename = data.archive_file.zip_enrichment.output_path
-    source_code_hash = data.archive_file.lambda_enrichment.output_base64sha256
+    source_code_hash = data.archive_file.zip_enrichment.output_base64sha256
+
+    role = aws_iam_role.lambda_exec.arn
+}
+
+# Create the lambda function anonymization
+resource "aws_lambda_function" "Anonymization" {
+    function_name = "AnonymizationFunction"
+
+    runtime = "python3.11"
+    handler = "anonymization.lambda_handler"
+
+    filename = data.archive_file.zip_anonymization.output_path
+    source_code_hash = data.archive_file.zip_anonymization.output_base64sha256
+
+    role = aws_iam_role.lambda_exec.arn
+}
+
+# Create the lambda function consolidation
+resource "aws_lambda_function" "Consolidation" {
+    function_name = "ConsolidationFunction"
+
+    runtime = "python3.11"
+    handler = "consolidation.lambda_handler"
+
+    filename = data.archive_file.zip_consolidation.output_path
+    source_code_hash = data.archive_file.zip_consolidation.output_base64sha256
 
     role = aws_iam_role.lambda_exec.arn
 }
