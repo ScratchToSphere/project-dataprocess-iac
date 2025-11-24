@@ -1,0 +1,37 @@
+{
+    "Comment": "Orchestration DataProcess : Enrichment + Anonymization -> Consolidation",
+    "StartAt": "TraitementParallele",
+    "States": {
+        "TraitementParallele": {
+            "Type": "Parallel",
+            "Next": "Consolidation",
+            "Branches": [
+                {
+                    "StartAt": "Enrichment",
+                    "States": {
+                        "Enrichissement": {
+                            "Type": "Task",
+                            "Resource": "${enrichment_arn}",
+                            "End": true
+                        }
+                    }
+                },
+                {
+                    "StartAt": "Anonymisation",
+                    "States": {
+                        "Anonymisation": {
+                            "Type": "Task",
+                            "Resource": "${anonymization_arn}",
+                            "End": true
+                        }
+                    }
+                }
+            ]
+        },
+        "Consolidation": {
+            "Type": "Task",
+            "Resource": "${consolidation_arn}",
+            "End": true
+        }
+    }
+}

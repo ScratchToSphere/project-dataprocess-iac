@@ -78,28 +78,20 @@ resource "aws_lambda_function" "Consolidation" {
     role = aws_iam_role.lambda_exec.arn
 }
 
-# IAM Role for Lambda Execution with S3 Access
-resource "aws_iam_role" "lambda_exec" {
-  name = "dataprocess-lambda-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = { Service = "lambda.amazonaws.com" }
-    }]
-  })
-}
-
 # Logs policy attachment
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# S3 full access policy attachment (Temporary)
-resource "aws_iam_role_policy_attachment" "lambda_s3" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+# Step Functions State Machine
+resource "aws_sfn_state_machine" "sfn_workflow" {
+  name     = "DataProcess-Workflow"
+  role_arn = aws_iam_role.step_function_role.arn
+
+  definition = templatefile("workflow.asl.json", {
+    enrichment_arn    = aws_lambda_function.Enrichment.arn
+    anonymization_arn = aws_lambda_function.Anonymization.arn
+    consolidation_arn = aws_lambda_function.Consolidation.arn
+  })
 }
