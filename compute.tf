@@ -63,6 +63,12 @@ resource "aws_lambda_function" "Anonymization" {
     source_code_hash = data.archive_file.zip_anonymization.output_base64sha256
 
     role = aws_iam_role.lambda_exec.arn
+
+    # Lambda in VPC
+    vpc_config {
+    subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
 }
 
 # Create the lambda function consolidation
