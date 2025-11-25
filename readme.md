@@ -49,7 +49,7 @@ The entire infrastructure is provisioned using **Terraform**, ensuring reproduci
 ├── events.tf           # Event-Driven (EventBridge Rules, Targets)
 ├── workflow.asl.json   # State Machine Definition (Amazon States Language)
 └── src/                # Python Source Code for Lambdas
-````
+```
 
 -----
 
@@ -106,4 +106,4 @@ terraform apply -auto-approve
 *Project realized as part of the AWS Solutions Architect Associate (SAA-C03) certification path.*
 
 ```
-```
+````
