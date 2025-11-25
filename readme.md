@@ -31,7 +31,7 @@ The pipeline relies on a **State Machine** model to ensure resilience and error 
     * **Consolidation:** Aggregates results using a third Lambda function.
 4.  **Storage:** Final data is written to `Amazon Aurora PostgreSQL` (hosted in a private subnet).
 
-![Workflow Architecture](proof_parallel_workflow_2.png)
+![High Level Design](architecture_diagram_dataprocess.png)
 
 ---
 
@@ -72,6 +72,8 @@ Uploading a file to the input S3 bucket instantly triggered a new execution in S
 ### C. Parallel Orchestration Success
 
 The Step Functions graph view confirms that Enrichment and Anonymization steps ran in parallel, followed by Consolidation, validating the workflow logic.
+
+![Workflow Architecture](stepfunctions_graph.png)
 
 -----
 
