@@ -8,6 +8,11 @@ resource "aws_s3_bucket" "dataprocess-input-thomas" {
   }
 }
 
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket      = aws_s3_bucket.dataprocess-input-thomas.id
+  eventbridge = true
+}
+
 # Create the S3 bucket for processed data
 resource "aws_s3_bucket" "dataprocess-output-thomas" {
   bucket = "dataprocess-output-thomas"
