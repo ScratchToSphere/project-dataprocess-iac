@@ -22,7 +22,7 @@ resource "aws_s3_bucket" "dataprocess-output-thomas" {
 data "archive_file" "zip_enrichment" {
   type        = "zip"
   source_file = "src/enrichment.py" 
-  output_path = "enrichissement.zip"
+  output_path = "enrichment.zip"
 }
 
 # Create the code archive for the Lambda function anonymization
@@ -82,6 +82,26 @@ resource "aws_lambda_function" "Consolidation" {
     source_code_hash = data.archive_file.zip_consolidation.output_base64sha256
 
     role = aws_iam_role.lambda_exec.arn
+
+    vpc_config {
+    # Lambda in VPC
+    subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    
+    # Attach the Lambda SG to allow DB access
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
+  
+  # Database connection parameters as environment variables
+  environment {
+    variables = {
+      DB_HOST     = aws_db_instance.postgres_instance.address
+      DB_NAME     = "dataprocessdb"
+      DB_USER     = "adminuser"
+      # NB : in production we would use AWS Secrets Manager or SSM Parameter Store.
+      # For the lab, we accept the risk or we use the random password directly.
+      DB_PASSWORD = random_password.db_password.result 
+    }
+  }
 }
 
 # Logs policy attachment
@@ -100,4 +120,33 @@ resource "aws_sfn_state_machine" "sfn_workflow" {
     anonymization_arn = aws_lambda_function.Anonymization.arn
     consolidation_arn = aws_lambda_function.Consolidation.arn
   })
+}
+
+# --- LAMBDA PRESIGNED URL (FRONT DOOR) ---
+
+# Create the code archive for the Lambda function to get presigned URL
+data "archive_file" "zip_presigned" {
+  type        = "zip"
+  source_file = "src/get_presigned_url.py"
+  output_path = "presigned.zip"
+}
+
+# Create the lambda function to get presigned URL
+resource "aws_lambda_function" "get_presigned_url" {
+  function_name = "GetPresignedUrlFunction"
+
+  runtime = "python3.11"
+  handler = "get_presigned_url.lambda_handler"
+
+  filename         = data.archive_file.zip_presigned.output_path
+  source_code_hash = data.archive_file.zip_presigned.output_base64sha256
+
+  role = aws_iam_role.lambda_exec.arn # Reusing the same execution role
+
+  # Bucket name as environment variable
+  environment {
+    variables = {
+      INPUT_BUCKET_NAME = aws_s3_bucket.dataprocess-input-thomas.bucket
+    }
+  }
 }
