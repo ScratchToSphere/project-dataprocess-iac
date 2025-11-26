@@ -38,7 +38,7 @@ The pipeline relies on a **State Machine** model to ensure resilience and error 
 
 The entire infrastructure is provisioned using **Terraform**, ensuring reproducibility.
 
-
+```text 
 .
 ├── main.tf             # Provider and Backend configuration
 ├── vpc.tf              # Network (VPC, Private Subnets, VPC Endpoints)
@@ -49,6 +49,7 @@ The entire infrastructure is provisioned using **Terraform**, ensuring reproduci
 ├── workflow.asl.json   # State Machine Definition (Amazon States Language)
 └── src/                # Python Source Code for Lambdas
 
+```
 
 -----
 
