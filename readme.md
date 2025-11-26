@@ -1,4 +1,3 @@
-````markdown
 # DataProcess: Serverless Event-Driven ETL Pipeline on AWS
 
 > **Project:** Automated, serverless data ingestion and processing infrastructure.
@@ -104,6 +103,3 @@ terraform apply -auto-approve
 -----
 
 *Project realized as part of the AWS Solutions Architect Associate (SAA-C03) certification path.*
-
-
-````
